@@ -10,6 +10,7 @@ const ColorList = ({ colors, updateColors }) => {
   console.log(colors);
   const [editing, setEditing] = useState(false);
   const [colorToEdit, setColorToEdit] = useState(initialColor);
+  const [newColor, setNewColor] = useState(initialColor);
 
   const editColor = color => {
     setEditing(true);
@@ -30,14 +31,35 @@ const ColorList = ({ colors, updateColors }) => {
           }else{
             return color
           }
+        }));
+        setEditing(false);
+      })
+      .catch(err=>console.error(err));
+  };
+
+  const deleteColor = color => {
+    // make a delete request to delete this color
+    axiosWithAuth()
+      .delete(`/api/colors/${color.id}`)
+      .then(res=>{
+        updateColors(colors.filter(color=>{
+          return color.id !== res.data
         }))
       })
       .catch(err=>console.error(err))
   };
 
-  const deleteColor = color => {
-    // make a delete request to delete this color
-  };
+  const addColor = event =>{
+    event.preventDefault();
+    axiosWithAuth()
+      .post('/api/colors', newColor)
+      .then(res=>{
+        updateColors(res.data)
+        setNewColor(initialColor)
+      }  
+      )
+      .catch(err=>console.error(err))
+  }
 
   return (
     <div className="colors-wrap">
@@ -62,6 +84,28 @@ const ColorList = ({ colors, updateColors }) => {
           </li>
         ))}
       </ul>
+      <form onSubmit={addColor}>
+        <legend>add color</legend>
+        <label>
+          color name:
+          <input
+            onChange={event =>
+              setNewColor({...newColor, color: event.target.value})
+            }
+            value={newColor.color}
+          />
+        </label>
+        <label>
+          hex code:
+          <input
+            onChange={e =>
+              setNewColor({...newColor, code: {hex: e.target.value}})
+            }
+            value={newColor.code.hex}
+            />
+        </label>
+        <button>submit</button>
+      </form>
       {editing && (
         <form onSubmit={saveEdit}>
           <legend>edit color</legend>
@@ -94,6 +138,7 @@ const ColorList = ({ colors, updateColors }) => {
       )}
       <div className="spacer" />
       {/* stretch - build another form here to add a color */}
+
     </div>
   );
 };
