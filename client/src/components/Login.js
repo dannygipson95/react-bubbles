@@ -29,6 +29,7 @@ const Login = () => {
       .post('/api/login', credentials)
       .then(res=>{
         window.localStorage.setItem('token', res.data.payload);
+        // setTimeout(, 250)
         history.push('/bubbles')
       })
       .catch(err=>console.error(err))
